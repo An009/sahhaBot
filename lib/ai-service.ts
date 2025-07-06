@@ -69,11 +69,28 @@ export class AIService {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ symptoms, language }),
+        body: JSON.stringify({ 
+          symptoms, 
+          language,
+          patientAge: undefined,
+          patientGender: undefined
+        }),
       });
 
       if (response.ok) {
-        return await response.json();
+        const result = await response.json();
+        // Transform the new API response format to match the expected format
+        if (result.analysis) {
+          return {
+            severity: result.analysis.urgencyLevel === 'high' ? 'emergency' : 
+                     result.analysis.urgencyLevel === 'medium' ? 'moderate' : 'low',
+            possibleConditions: result.analysis.possibleConditions,
+            recommendations: result.analysis.recommendedActions,
+            urgency: result.analysis.urgencyLevel,
+            warning: result.analysis.warning
+          };
+        }
+        return result;
       }
       
       throw new Error('AI service unavailable');
