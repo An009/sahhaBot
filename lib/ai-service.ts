@@ -23,7 +23,7 @@ export class AIService {
   private static instance: AIService;
   private offlineResponses: Map<string, Omit<SymptomAnalysis, 'timestamp' | 'source'>> = new Map();
   private cache: Map<string, SymptomAnalysis> = new Map();
-  private readonly API_TIMEOUT = 10000; // 10 seconds
+  private readonly API_TIMEOUT = 35000; // 35 seconds - increased from 10 seconds
   private readonly MAX_RETRIES = 2;
 
   constructor() {
@@ -229,59 +229,6 @@ export class AIService {
     }
   }
 
-  private async storeInSupabase(symptoms: string, analysis: SymptomAnalysis) {
-    try {
-      // Only import supabase when needed to avoid SSR issues
-      const { supabase } = await import('./supabase');
-      
-      await supabase.from('symptom_submissions').insert([{
-        symptoms,
-        language: 'en', // You might want to pass this as a parameter
-        analysis: JSON.stringify(analysis),
-        severity: analysis.severity,
-        recommendations: analysis.recommendations,
-        created_at: new Date().toISOString(),
-        synced: true
-      }]);
-      
-      console.log('Successfully stored analysis in Supabase');
-    } catch (error) {
-      console.error('Failed to store in Supabase:', error);
-      // Store offline for later sync
-      await this.storeOfflineForSync(symptoms, analysis);
-    }
-  }
-
-  private async storeOfflineForSync(symptoms: string, analysis: SymptomAnalysis) {
-    if (typeof window !== 'undefined' && 'indexedDB' in window) {
-      try {
-        const dbName = 'sahhabot-offline';
-        const request = indexedDB.open(dbName, 1);
-        
-        request.onupgradeneeded = (event) => {
-          const db = (event.target as IDBOpenDBRequest).result;
-          if (!db.objectStoreNames.contains('pending_sync')) {
-            db.createObjectStore('pending_sync', { keyPath: 'id', autoIncrement: true });
-          }
-        };
-
-        request.onsuccess = (event) => {
-          const db = (event.target as IDBOpenDBRequest).result;
-          const transaction = db.transaction(['pending_sync'], 'readwrite');
-          const store = transaction.objectStore('pending_sync');
-          store.add({
-            symptoms,
-            analysis,
-            timestamp: new Date().toISOString(),
-            synced: false
-          });
-        };
-      } catch (error) {
-        console.error('Failed to store offline data:', error);
-      }
-    }
-  }
-
   private isOnline(): boolean {
     return typeof window !== 'undefined' ? navigator.onLine : true;
   }
@@ -338,9 +285,6 @@ export class AIService {
       const cacheKey = symptoms.toLowerCase().trim();
       this.cache.set(cacheKey, analysis);
       await this.saveCacheToStorage();
-      
-      // Store in Supabase (async, don't wait)
-      this.storeInSupabase(symptoms, analysis).catch(console.error);
       
       return analysis;
 
@@ -480,44 +424,5 @@ export class AIService {
       timestamp: new Date().toISOString(),
       source: 'fallback'
     };
-  }
-
-  // Method to sync offline data when connection is restored
-  async syncOfflineData(): Promise<void> {
-    if (!this.isOnline()) {
-      console.log('Still offline, cannot sync');
-      return;
-    }
-
-    if (typeof window !== 'undefined' && 'indexedDB' in window) {
-      try {
-        const dbName = 'sahhabot-offline';
-        const request = indexedDB.open(dbName, 1);
-        
-        request.onsuccess = async (event) => {
-          const db = (event.target as IDBOpenDBRequest).result;
-          const transaction = db.transaction(['pending_sync'], 'readwrite');
-          const store = transaction.objectStore('pending_sync');
-          const getAllRequest = store.getAll();
-          
-          getAllRequest.onsuccess = async () => {
-            const pendingItems = getAllRequest.result;
-            console.log(`Found ${pendingItems.length} items to sync`);
-            
-            for (const item of pendingItems) {
-              try {
-                await this.storeInSupabase(item.symptoms, item.analysis);
-                store.delete(item.id);
-                console.log(`Synced item ${item.id}`);
-              } catch (error) {
-                console.error(`Failed to sync item ${item.id}:`, error);
-              }
-            }
-          };
-        };
-      } catch (error) {
-        console.error('Failed to sync offline data:', error);
-      }
-    }
   }
 }
