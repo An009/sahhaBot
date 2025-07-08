@@ -26,7 +26,9 @@ export const translations = {
       emergency: 'طوارئ'
     },
     offline: 'غير متصل',
-    syncWhenOnline: 'سيتم المزامنة عند الاتصال'
+    syncWhenOnline: 'سيتم المزامنة عند الاتصال',
+    analyzing: 'جاري التحليل...',
+    locationRequired: 'الموقع مطلوب'
   },
   fr: {
     appName: 'SahhaBot',
@@ -47,7 +49,9 @@ export const translations = {
       emergency: 'Urgence'
     },
     offline: 'Hors ligne',
-    syncWhenOnline: 'Synchronisation à la connexion'
+    syncWhenOnline: 'Synchronisation à la connexion',
+    analyzing: 'Analyse en cours...',
+    locationRequired: 'Localisation requise'
   },
   da: {
     appName: 'صحة بوت',
@@ -68,7 +72,9 @@ export const translations = {
       emergency: 'طوارئ'
     },
     offline: 'ماشي متصل',
-    syncWhenOnline: 'غيتسينك ملي تتصل'
+    syncWhenOnline: 'غيتسينك ملي تتصل',
+    analyzing: 'كنحلل...',
+    locationRequired: 'خاصنا الموقع'
   }
 };
 

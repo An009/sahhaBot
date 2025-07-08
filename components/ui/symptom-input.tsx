@@ -1,74 +1,25 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Mic, MicOff, AlertTriangle, Send } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { SpeechRecognitionComponent } from '@/components/ui/speech-recognition';
+import { AlertTriangle, Mic, Send, Loader2 } from 'lucide-react';
 import { getTranslation, type Language } from '@/lib/i18n';
 
 interface SymptomInputProps {
   language: Language;
   onSubmit: (symptoms: string) => void;
   onEmergency: () => void;
-  isLoading?: boolean;
+  isLoading: boolean;
 }
 
 export function SymptomInput({ language, onSubmit, onEmergency, isLoading }: SymptomInputProps) {
   const [symptoms, setSymptoms] = useState('');
-  const [isListening, setIsListening] = useState(false);
-  const [recognition, setRecognition] = useState<SpeechRecognition | null>(null);
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
-
-  useEffect(() => {
-    if (typeof window !== 'undefined' && 'webkitSpeechRecognition' in window) {
-      const SpeechRecognition = window.webkitSpeechRecognition || window.SpeechRecognition;
-      const recognition = new SpeechRecognition();
-      
-      recognition.continuous = true;
-      recognition.interimResults = true;
-      recognition.lang = language === 'ar' ? 'ar-MA' : language === 'fr' ? 'fr-FR' : 'ar-MA';
-
-      recognition.onresult = (event) => {
-        let finalTranscript = '';
-        let interimTranscript = '';
-
-        for (let i = event.resultIndex; i < event.results.length; i++) {
-          const transcript = event.results[i][0].transcript;
-          if (event.results[i].isFinal) {
-            finalTranscript += transcript;
-          } else {
-            interimTranscript += transcript;
-          }
-        }
-
-        setSymptoms(prev => prev + finalTranscript);
-      };
-
-      recognition.onend = () => {
-        setIsListening(false);
-      };
-
-      recognition.onerror = (event) => {
-        console.error('Speech recognition error:', event.error);
-        setIsListening(false);
-      };
-
-      setRecognition(recognition);
-    }
-  }, [language]);
-
-  const toggleListening = () => {
-    if (!recognition) return;
-
-    if (isListening) {
-      recognition.stop();
-      setIsListening(false);
-    } else {
-      recognition.start();
-      setIsListening(true);
-    }
-  };
+  const [showSpeechRecognition, setShowSpeechRecognition] = useState(false);
+  const [wordCount, setWordCount] = useState(0);
 
   const handleSubmit = () => {
     if (symptoms.trim()) {
@@ -76,66 +27,144 @@ export function SymptomInput({ language, onSubmit, onEmergency, isLoading }: Sym
     }
   };
 
+  const handleSymptomsChange = (value: string) => {
+    setSymptoms(value);
+    setWordCount(value.trim().split(/\s+/).filter(word => word.length > 0).length);
+  };
+
+  const handleTranscriptUpdate = (transcript: string) => {
+    setSymptoms(transcript);
+    setWordCount(transcript.trim().split(/\s+/).filter(word => word.length > 0).length);
+  };
+
   const isRTL = language === 'ar' || language === 'da';
 
   return (
-    <Card className="w-full max-w-2xl mx-auto">
-      <CardHeader>
-        <CardTitle className={`text-xl ${isRTL ? 'text-right' : 'text-left'}`}>
-          {getTranslation(language, 'describeSymptoms')}
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        <div className="relative">
-          <Textarea
-            ref={textareaRef}
-            value={symptoms}
-            onChange={(e) => setSymptoms(e.target.value)}
-            placeholder={getTranslation(language, 'describeSymptoms')}
-            className={`min-h-[120px] resize-none ${isRTL ? 'text-right' : 'text-left'}`}
-            dir={isRTL ? 'rtl' : 'ltr'}
-          />
-          
-          {recognition && (
+    <div className="space-y-6">
+      <Card>
+        <CardHeader>
+          <CardTitle className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
+            <AlertTriangle className="h-5 w-5 text-blue-600" />
+            {getTranslation(language, 'describeSymptoms')}
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {/* Speech Recognition Toggle */}
+          <div className={`flex items-center gap-4 ${isRTL ? 'flex-row-reverse' : ''}`}>
             <Button
-              type="button"
-              size="sm"
-              variant={isListening ? "destructive" : "outline"}
-              onClick={toggleListening}
-              className="absolute bottom-2 right-2"
+              variant={showSpeechRecognition ? 'default' : 'outline'}
+              onClick={() => setShowSpeechRecognition(!showSpeechRecognition)}
+              className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}
             >
-              {isListening ? <MicOff className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
+              <Mic className="h-4 w-4" />
+              {getTranslation(language, 'speakSymptoms')}
             </Button>
-          )}
-        </div>
-
-        {isListening && (
-          <div className="flex items-center gap-2 text-sm text-blue-600">
-            <div className="animate-pulse w-2 h-2 bg-red-500 rounded-full"></div>
-            {getTranslation(language, 'listening')}
+            
+            {wordCount > 0 && (
+              <Badge variant="secondary">
+                {wordCount} {wordCount === 1 ? 'word' : 'words'}
+              </Badge>
+            )}
           </div>
-        )}
 
-        <div className="flex gap-2">
-          <Button
-            onClick={handleSubmit}
-            disabled={!symptoms.trim() || isLoading}
-            className="flex-1"
-          >
-            <Send className="h-4 w-4 mr-2" />
-            {getTranslation(language, 'symptoms')}
-          </Button>
+          {/* Speech Recognition Component */}
+          {showSpeechRecognition && (
+            <SpeechRecognitionComponent
+              language={language}
+              onTranscriptUpdate={handleTranscriptUpdate}
+            />
+          )}
 
-          <Button
-            onClick={onEmergency}
-            variant="destructive"
-            className="flex items-center gap-2"
-          >
-            <AlertTriangle className="h-4 w-4" />
-            {getTranslation(language, 'emergency')}
-          </Button>
-        </div>
-      </CardContent>
-    </Card>
+          {/* Text Input */}
+          <div className="space-y-2">
+            <Textarea
+              value={symptoms}
+              onChange={(e) => handleSymptomsChange(e.target.value)}
+              placeholder={
+                language === 'ar' 
+                  ? 'صف أعراضك بالتفصيل... مثال: أشعر بصداع شديد وحمى منذ يومين'
+                  : language === 'fr'
+                  ? 'Décrivez vos symptômes en détail... Exemple: J\'ai un mal de tête sévère et de la fièvre depuis deux jours'
+                  : 'وصف الأعراض ديالك بالتفصيل... مثال: عندي صداع قوي و سخانة من يومين'
+              }
+              className={`min-h-32 resize-none ${isRTL ? 'text-right' : 'text-left'}`}
+              dir={isRTL ? 'rtl' : 'ltr'}
+            />
+            
+            <div className={`flex justify-between text-sm text-gray-500 ${isRTL ? 'flex-row-reverse' : ''}`}>
+              <span>{symptoms.length}/2000 characters</span>
+              {symptoms.length > 1800 && (
+                <span className="text-orange-600">
+                  Approaching character limit
+                </span>
+              )}
+            </div>
+          </div>
+
+          {/* Action Buttons */}
+          <div className={`flex gap-3 ${isRTL ? 'flex-row-reverse' : ''}`}>
+            <Button
+              onClick={handleSubmit}
+              disabled={!symptoms.trim() || isLoading}
+              className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}
+            >
+              {isLoading ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Send className="h-4 w-4" />
+              )}
+              {isLoading ? getTranslation(language, 'analyzing') || 'Analyzing...' : 'Analyze Symptoms'}
+            </Button>
+
+            <Button
+              variant="destructive"
+              onClick={onEmergency}
+              className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}
+            >
+              <AlertTriangle className="h-4 w-4" />
+              {getTranslation(language, 'emergency')}
+            </Button>
+          </div>
+
+          {/* Help Text */}
+          <div className={`text-sm text-gray-600 ${isRTL ? 'text-right' : 'text-left'}`}>
+            <p className="mb-2">
+              {language === 'ar' 
+                ? 'للحصول على تحليل دقيق، يرجى تقديم معلومات مفصلة حول:'
+                : language === 'fr'
+                ? 'Pour une analyse précise, veuillez fournir des informations détaillées sur:'
+                : 'باش نعطيوك تحليل مزيان، عطينا معلومات مفصلة على:'
+              }
+            </p>
+            <ul className={`list-disc ${isRTL ? 'list-inside' : 'ml-4'} space-y-1`}>
+              <li>
+                {language === 'ar' 
+                  ? 'الأعراض الحالية وشدتها'
+                  : language === 'fr'
+                  ? 'Symptômes actuels et leur intensité'
+                  : 'الأعراض اللي عندك دابا و قداش قوية'
+                }
+              </li>
+              <li>
+                {language === 'ar' 
+                  ? 'متى بدأت الأعراض'
+                  : language === 'fr'
+                  ? 'Quand les symptômes ont commencé'
+                  : 'إمتى بداو الأعراض'
+                }
+              </li>
+              <li>
+                {language === 'ar' 
+                  ? 'أي عوامل مؤثرة أو محفزة'
+                  : language === 'fr'
+                  ? 'Facteurs déclenchants ou aggravants'
+                  : 'أي حاجة خلات الأعراض تزيد'
+                }
+              </li>
+            </ul>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
   );
 }
