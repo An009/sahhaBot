@@ -124,4 +124,4 @@ To get SahhaBot up and running on your local machine:
 
 
 ## Licence
-  [this project is under mit licence](LICENCE)
+This project is licensed under the [MIT License](LICENSE).
