@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { MotionWrapper } from './motion-wrapper';
 import { GlassCard } from './glass-card';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -18,6 +18,11 @@ interface SymptomAnalysisProps {
 
 export function SymptomAnalysisDisplay({ analysis, language, symptoms }: SymptomAnalysisProps) {
   const [isSpeaking, setIsSpeaking] = useState(false);
+  const [isBrowser, setIsBrowser] = useState(false);
+
+  useEffect(() => {
+    setIsBrowser(typeof window !== 'undefined');
+  }, []);
 
   const getSeverityColor = (severity: string) => {
     switch (severity) {
@@ -40,23 +45,23 @@ export function SymptomAnalysisDisplay({ analysis, language, symptoms }: Symptom
   };
 
   const speakText = (text: string) => {
-    if ('speechSynthesis' in window) {
-      if (isSpeaking) {
-        speechSynthesis.cancel();
-        setIsSpeaking(false);
-        return;
-      }
+    if (!isBrowser || !('speechSynthesis' in window)) return;
 
-      const utterance = new SpeechSynthesisUtterance(text);
-      utterance.lang = language === 'ar' ? 'ar-SA' : language === 'fr' ? 'fr-FR' : 'ar-SA';
-      utterance.rate = 0.8;
-      
-      utterance.onstart = () => setIsSpeaking(true);
-      utterance.onend = () => setIsSpeaking(false);
-      utterance.onerror = () => setIsSpeaking(false);
-
-      speechSynthesis.speak(utterance);
+    if (isSpeaking) {
+      speechSynthesis.cancel();
+      setIsSpeaking(false);
+      return;
     }
+
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = language === 'ar' ? 'ar-SA' : language === 'fr' ? 'fr-FR' : 'ar-SA';
+    utterance.rate = 0.8;
+    
+    utterance.onstart = () => setIsSpeaking(true);
+    utterance.onend = () => setIsSpeaking(false);
+    utterance.onerror = () => setIsSpeaking(false);
+
+    speechSynthesis.speak(utterance);
   };
 
   const isRTL = language === 'ar' || language === 'da';

@@ -71,12 +71,19 @@ export class AdvancedSpeechRecognition {
   };
 
   constructor() {
-    this.initializeAudioContext();
+    if (typeof window !== 'undefined') {
+      this.initializeAudioContext();
+    }
   }
 
   private async initializeAudioContext() {
+    if (typeof window === 'undefined') return;
+
     try {
-      this.audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+      const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
+      if (!AudioContextClass) return;
+
+      this.audioContext = new AudioContextClass();
       
       // Resume audio context if suspended
       if (this.audioContext.state === 'suspended') {
@@ -88,7 +95,7 @@ export class AdvancedSpeechRecognition {
   }
 
   private async setupAudioProcessing(stream: MediaStream) {
-    if (!this.audioContext) return;
+    if (!this.audioContext || typeof window === 'undefined') return;
 
     try {
       const source = this.audioContext.createMediaStreamSource(stream);
@@ -131,6 +138,8 @@ export class AdvancedSpeechRecognition {
   }
 
   private initializeSpeechRecognition(language: string): boolean {
+    if (typeof window === 'undefined') return false;
+    
     if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
       console.error('Speech recognition not supported');
       return false;
@@ -156,7 +165,7 @@ export class AdvancedSpeechRecognition {
   }
 
   private createGrammar(vocabulary: string[]): any {
-    if (!('webkitSpeechGrammarList' in window)) return null;
+    if (typeof window === 'undefined' || !('webkitSpeechGrammarList' in window)) return null;
     
     const SpeechGrammarList = (window as any).webkitSpeechGrammarList;
     const grammarList = new SpeechGrammarList();
@@ -169,12 +178,20 @@ export class AdvancedSpeechRecognition {
   }
 
   async startRecognition(language: string = 'ar-MA'): Promise<TranscriptionSession> {
+    if (typeof window === 'undefined') {
+      throw new Error('Speech recognition is only available in browser environment');
+    }
+
     if (this.isListening) {
       throw new Error('Recognition already in progress');
     }
 
     try {
       // Request microphone permission with enhanced constraints
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        throw new Error('Media devices not supported');
+      }
+
       this.mediaStream = await navigator.mediaDevices.getUserMedia({
         audio: {
           echoCancellation: true,
@@ -221,7 +238,7 @@ export class AdvancedSpeechRecognition {
   }
 
   private setupRecognitionHandlers() {
-    if (!this.recognition || !this.currentSession) return;
+    if (!this.recognition || !this.currentSession || typeof window === 'undefined') return;
 
     this.recognition.onresult = (event) => {
       const results = Array.from(event.results);
@@ -300,6 +317,8 @@ export class AdvancedSpeechRecognition {
   }
 
   private updateInterimResult(text: string, confidence: number) {
+    if (typeof window === 'undefined') return;
+
     // Dispatch interim result event
     const event = new CustomEvent('speechInterim', {
       detail: {
@@ -343,6 +362,8 @@ export class AdvancedSpeechRecognition {
   }
 
   private dispatchSegmentEvent(segment: SpeechSegment) {
+    if (typeof window === 'undefined') return;
+
     const event = new CustomEvent('speechSegment', { detail: segment });
     window.dispatchEvent(event);
   }
@@ -456,6 +477,7 @@ export class AdvancedSpeechRecognition {
   }
 
   isSupported(): boolean {
+    if (typeof window === 'undefined') return false;
     return 'webkitSpeechRecognition' in window || 'SpeechRecognition' in window;
   }
 

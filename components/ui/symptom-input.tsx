@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { MotionWrapper } from './motion-wrapper';
 import { GlassCard } from './glass-card';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -22,6 +22,11 @@ export function SymptomInput({ language, onSubmit, onEmergency, isLoading }: Sym
   const [symptoms, setSymptoms] = useState('');
   const [showSpeechRecognition, setShowSpeechRecognition] = useState(false);
   const [wordCount, setWordCount] = useState(0);
+  const [isBrowser, setIsBrowser] = useState(false);
+
+  useEffect(() => {
+    setIsBrowser(typeof window !== 'undefined');
+  }, []);
 
   const handleSubmit = () => {
     if (symptoms.trim()) {
@@ -57,6 +62,7 @@ export function SymptomInput({ language, onSubmit, onEmergency, isLoading }: Sym
               variant={showSpeechRecognition ? 'default' : 'outline'}
               onClick={() => setShowSpeechRecognition(!showSpeechRecognition)}
               className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}
+              disabled={!isBrowser}
             >
               <Mic className="h-4 w-4" />
               {getTranslation(language, 'speakSymptoms')}
@@ -70,7 +76,7 @@ export function SymptomInput({ language, onSubmit, onEmergency, isLoading }: Sym
           </div>
 
           {/* Speech Recognition Component */}
-          {showSpeechRecognition && (
+          {showSpeechRecognition && isBrowser && (
             <SpeechRecognitionComponent
               language={language}
               onTranscriptUpdate={handleTranscriptUpdate}
@@ -148,11 +154,12 @@ export function SymptomInput({ language, onSubmit, onEmergency, isLoading }: Sym
               />
               <div className="absolute bottom-2 right-2 flex gap-2">
                 <MotionWrapper animation="scale" delay={300}>
-                  <SpeechRecognition
-                    language={language}
-                    onResult={(text) => setSymptoms(prev => prev + ' ' + text)}
-                    className="h-8 w-8 hover-lift"
-                  />
+                  {isBrowser && (
+                    <SpeechRecognitionComponent
+                      language={language}
+                      onTranscriptUpdate={(text) => setSymptoms(prev => prev + ' ' + text)}
+                    />
+                  )}
                 </MotionWrapper>
               </div>
             </div>
