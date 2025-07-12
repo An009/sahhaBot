@@ -1,6 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { MotionWrapper } from './motion-wrapper';
+import { GlassCard } from './glass-card';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -220,27 +222,36 @@ export function HealthcareFinder({ language, userLocation }: HealthcareFinderPro
               <option value={1000}>1 km</option>
               <option value={2000}>2 km</option>
               <option value={5000}>5 km</option>
-              <option value={10000}>10 km</option>
-              <option value={20000}>20 km</option>
-            </select>
-            
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={loadNearbyFacilities}
-              disabled={isLoading}
-              className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}
-            >
-              {isLoading ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
+      <MotionWrapper animation="slideUp" delay={100}>
+        <GlassCard variant="subtle">
+          <CardContent className="p-4">
+            <div className={`flex items-center gap-3 ${isRTL ? 'flex-row-reverse' : ''}`}>
+              {userLocation ? (
+                <>
+                  <div className="p-2 bg-green-100 rounded-full">
+                    <MapPin className="h-4 w-4 text-green-600" />
+                  </div>
+                  <div>
+                    <span className="text-sm font-medium text-green-700">Location detected</span>
+                    <p className="text-xs text-green-600">
+                      {userLocation.latitude.toFixed(4)}, {userLocation.longitude.toFixed(4)}
+                    </p>
+                  </div>
+                </>
               ) : (
-                <RefreshCw className="h-4 w-4" />
+                <>
+                  <div className="p-2 bg-orange-100 rounded-full">
+                    <MapPin className="h-4 w-4 text-orange-600 animate-pulse" />
+                  </div>
+                  <span className="text-sm font-medium text-orange-700">
+                    {getTranslation(language, 'locationRequired')}
+                  </span>
+                </>
               )}
-              {language === 'ar' ? 'تحديث' : language === 'fr' ? 'Actualiser' : 'تحديث'}
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
+            </div>
+          </CardContent>
+        </GlassCard>
+      </MotionWrapper>
 
       {/* Results */}
       <Card>
@@ -269,120 +280,147 @@ export function HealthcareFinder({ language, userLocation }: HealthcareFinderPro
               </Button>
             </div>
           ) : filteredFacilities.length === 0 ? (
-            <div className="text-center py-8">
-              <MapPin className="h-8 w-8 text-gray-400 mx-auto mb-4" />
-              <p className="text-gray-600">
-                {language === 'ar' 
-                  ? 'لم يتم العثور على مرافق صحية في المنطقة المحددة'
-                  : language === 'fr'
-                  ? 'Aucun établissement de santé trouvé dans la zone spécifiée'
-                  : 'ما لقيناش مستشفيات في المنطقة اللي اخترتي'
-                }
-              </p>
-            </div>
-          ) : (
-            <div className="space-y-4">
-              <p className={`text-sm text-gray-600 mb-4 ${isRTL ? 'text-right' : 'text-left'}`}>
-                {language === 'ar' 
-                  ? `تم العثور على ${filteredFacilities.length} مرفق صحي`
-                  : language === 'fr'
-                  ? `${filteredFacilities.length} établissements trouvés`
-                  : `لقينا ${filteredFacilities.length} مستشفى`
-                }
-              </p>
-              
-              {filteredFacilities.map((facility) => (
-                <Card key={facility.id} className="hover:shadow-md transition-shadow">
-                  <CardContent className="p-4">
-                    <div className={`flex items-start gap-4 ${isRTL ? 'flex-row-reverse' : ''}`}>
-                      <div className="flex-shrink-0">
-                        {getFacilityIcon(facility.type)}
-                      </div>
-                      
-                      <div className="flex-1 min-w-0">
-                        <div className={`flex items-start justify-between gap-4 mb-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
-                          <div className={`${isRTL ? 'text-right' : 'text-left'}`}>
-                            <h3 className="font-semibold text-lg">{facility.name}</h3>
-                            <p className="text-gray-600 text-sm">{facility.address}</p>
-                          </div>
-                          
-                          <div className={`flex flex-col gap-2 ${isRTL ? 'items-end' : 'items-start'}`}>
-                            <Badge className={getFacilityTypeColor(facility.type)}>
-                              {facility.type === 'hospital' 
-                                ? (language === 'ar' ? 'مستشفى' : language === 'fr' ? 'Hôpital' : 'مستشفى')
-                                : facility.type === 'clinic'
-                                ? (language === 'ar' ? 'عيادة' : language === 'fr' ? 'Clinique' : 'عيادة')
-                                : (language === 'ar' ? 'صيدلية' : language === 'fr' ? 'Pharmacie' : 'صيدلية')
-                              }
+      <MotionWrapper animation="slideUp" delay={400}>
+        <GlassCard hover glow className="backdrop-blur-lg">
+          <CardHeader>
+            <CardTitle className={`flex items-center gap-2 text-lg font-semibold text-gray-800 ${isRTL ? 'flex-row-reverse text-right' : 'text-left'}`}>
+              <Building2 className="h-5 w-5 text-blue-600" />
+              {getTranslation(language, 'nearbyFacilities')}
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {isLoading ? (
+              <MotionWrapper animation="fadeIn">
+                <div className="flex items-center justify-center py-12">
+                  <div className="text-center">
+                    <Loader2 className="h-8 w-8 animate-spin text-blue-600 mx-auto mb-3" />
+                    <span className="text-sm text-gray-600 font-medium">Loading facilities...</span>
+                  </div>
+                </div>
+              </MotionWrapper>
+            ) : error ? (
+              <MotionWrapper animation="slideUp">
+                <div className="text-center py-12">
+                  <div className="p-3 bg-red-100 rounded-full w-fit mx-auto mb-3">
+                    <AlertTriangle className="h-8 w-8 text-red-500" />
+                  </div>
+                  <p className="text-sm text-red-600 mb-4">{error}</p>
+                  <Button
+                    onClick={loadNearbyFacilities}
+                    variant="outline"
+                    size="sm"
+                    className="hover-lift"
+                  >
+                    Try Again
+                  </Button>
+                </div>
+              </MotionWrapper>
+            ) : facilities.length === 0 ? (
+              <MotionWrapper animation="fadeIn">
+                <div className="text-center py-12">
+                  <div className="p-3 bg-gray-100 rounded-full w-fit mx-auto mb-3">
+                    <Building2 className="h-8 w-8 text-gray-400" />
+                  </div>
+                  <p className="text-sm text-gray-600">No facilities found in your area</p>
+                </div>
+              </MotionWrapper>
+            ) : (
+              <div className="space-y-4">
+                {facilities.map((facility, index) => (
+                  <MotionWrapper key={facility.id} animation="slideUp" delay={500 + index * 100}>
+                    <GlassCard 
+                      variant="subtle" 
+                      hover 
+                      className="p-4 hover:shadow-lg transition-all duration-300"
+                    >
+                      <div className={`flex items-start justify-between ${isRTL ? 'flex-row-reverse' : ''}`}>
+                        <div className={`flex-1 ${isRTL ? 'text-right' : 'text-left'}`}>
+                          <div className={`flex items-center gap-2 mb-3 ${isRTL ? 'flex-row-reverse' : ''}`}>
+                            <h3 className="font-semibold text-gray-900">{facility.name}</h3>
+                            <Badge 
+                              variant={getFacilityTypeVariant(facility.type)}
+                              className="shadow-sm"
+                            >
+                              {facility.type}
                             </Badge>
-                            
                             {facility.emergency_services && (
-                              <Badge variant="destructive" className="text-xs">
-                                {language === 'ar' ? 'طوارئ' : language === 'fr' ? 'Urgences' : 'طوارئ'}
+                              <Badge variant="destructive" className="text-xs animate-pulse">
+                                Emergency
                               </Badge>
                             )}
                           </div>
-                        </div>
-                        
-                        {/* Services */}
-                        {facility.services.length > 0 && (
-                          <div className={`mb-3 ${isRTL ? 'text-right' : 'text-left'}`}>
-                            <p className="text-sm font-medium mb-1">
-                              {language === 'ar' ? 'الخدمات:' : language === 'fr' ? 'Services:' : 'الخدمات:'}
-                            </p>
-                            <div className={`flex flex-wrap gap-1 ${isRTL ? 'flex-row-reverse' : ''}`}>
-                              {facility.services.slice(0, 3).map((service, index) => (
-                                <Badge key={index} variant="secondary" className="text-xs">
-                                  {service}
-                                </Badge>
-                              ))}
-                              {facility.services.length > 3 && (
-                                <Badge variant="secondary" className="text-xs">
-                                  +{facility.services.length - 3} more
-                                </Badge>
-                              )}
+                          
+                          <div className="space-y-2 text-sm text-gray-600">
+                            <div className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
+                              <MapPin className="h-4 w-4 text-blue-500" />
+                              <span>{facility.address}</span>
+                            </div>
+                            
+                            {facility.phone && (
+                              <div className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
+                                <Phone className="h-4 w-4 text-green-500" />
+                                <span>{facility.phone}</span>
+                              </div>
+                            )}
+                            
+                            <div className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
+                              <Clock className="h-4 w-4 text-orange-500" />
+                              <span>{facility.hours}</span>
                             </div>
                           </div>
-                        )}
-                        
-                        {/* Hours */}
-                        <div className={`flex items-center gap-2 mb-3 text-sm text-gray-600 ${isRTL ? 'flex-row-reverse' : ''}`}>
-                          <Clock className="h-4 w-4" />
-                          <span>{facility.hours}</span>
-                        </div>
-                        
-                        {/* Action Buttons */}
-                        <div className={`flex gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
-                          <Button
-                            size="sm"
-                            onClick={() => openDirections(facility)}
-                            className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}
-                          >
-                            <Navigation className="h-4 w-4" />
-                            {language === 'ar' ? 'الاتجاهات' : language === 'fr' ? 'Directions' : 'الاتجاهات'}
-                          </Button>
                           
-                          {facility.phone && (
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() => callFacility(facility.phone!)}
-                              className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}
-                            >
-                              <Phone className="h-4 w-4" />
-                              {language === 'ar' ? 'اتصال' : language === 'fr' ? 'Appeler' : 'اتصال'}
-                            </Button>
+                          {facility.services.length > 0 && (
+                            <div className="mt-3">
+                              <p className="text-xs text-gray-500 mb-2 font-medium">Services:</p>
+                              <div className="flex flex-wrap gap-1">
+                                {facility.services.slice(0, 3).map((service, index) => (
+                                  <Badge key={index} variant="secondary" className="text-xs shadow-sm">
+                                    {service}
+                                  </Badge>
+                                ))}
+                                {facility.services.length > 3 && (
+                                  <Badge variant="secondary" className="text-xs shadow-sm">
+                                    +{facility.services.length - 3} more
+                                  </Badge>
+                                )}
+                              </div>
+                            </div>
                           )}
                         </div>
+                        
+                        <div className="flex flex-col gap-2 ml-4">
+                          <Button
+                            size="sm"
+                            onClick={() => window.open(`tel:${facility.phone}`, '_self')}
+                            disabled={!facility.phone}
+                            className="whitespace-nowrap bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 shadow-sm hover-lift"
+                          >
+                            <Phone className="h-3 w-3 mr-1" />
+                            Call
+                          </Button>
+                          
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => {
+                              const url = `https://www.google.com/maps/dir/?api=1&destination=${facility.location.latitude},${facility.location.longitude}`;
+                              window.open(url, '_blank');
+                            }}
+                            className="whitespace-nowrap hover-lift border-blue-200 hover:bg-blue-50"
+                          >
+                            <Navigation className="h-3 w-3 mr-1" />
+                            Directions
+                          </Button>
+                        </div>
                       </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          )}
-        </CardContent>
-      </Card>
+                    </GlassCard>
+                  </MotionWrapper>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </GlassCard>
+      </MotionWrapper>
     </div>
   );
 }

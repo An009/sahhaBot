@@ -1,6 +1,8 @@
 'use client';
 
 import { useState } from 'react';
+import { MotionWrapper } from './motion-wrapper';
+import { GlassCard } from './glass-card';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -40,7 +42,7 @@ export function SymptomInput({ language, onSubmit, onEmergency, isLoading }: Sym
   const isRTL = language === 'ar' || language === 'da';
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 relative">
       <Card>
         <CardHeader>
           <CardTitle className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
@@ -124,47 +126,55 @@ export function SymptomInput({ language, onSubmit, onEmergency, isLoading }: Sym
               <AlertTriangle className="h-4 w-4" />
               {getTranslation(language, 'emergency')}
             </Button>
-          </div>
-
-          {/* Help Text */}
-          <div className={`text-sm text-gray-600 ${isRTL ? 'text-right' : 'text-left'}`}>
-            <p className="mb-2">
-              {language === 'ar' 
-                ? 'للحصول على تحليل دقيق، يرجى تقديم معلومات مفصلة حول:'
-                : language === 'fr'
-                ? 'Pour une analyse précise, veuillez fournir des informations détaillées sur:'
-                : 'باش نعطيوك تحليل مزيان، عطينا معلومات مفصلة على:'
-              }
-            </p>
-            <ul className={`list-disc ${isRTL ? 'list-inside' : 'ml-4'} space-y-1`}>
+      <MotionWrapper animation="slideUp" delay={200}>
+        <GlassCard hover glow className="backdrop-blur-lg">
+          <CardHeader>
+            <CardTitle className={`${isRTL ? 'text-right' : 'text-left'} text-xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent`}>
+              {getTranslation(language, 'describeSymptoms')}
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="relative">
+              <Textarea
+                value={symptoms}
+                onChange={(e) => setSymptoms(e.target.value)}
+                placeholder={getTranslation(language, 'describeSymptoms')}
+                className={`min-h-32 resize-none bg-white/50 backdrop-blur-sm border-white/30 focus:border-blue-400 focus:ring-2 focus:ring-blue-400/20 transition-all duration-300 ${isRTL ? 'text-right' : 'text-left'}`}
+                dir={isRTL ? 'rtl' : 'ltr'}
+              />
+              <div className="absolute bottom-2 right-2 flex gap-2">
+                <MotionWrapper animation="scale" delay={300}>
+                  <SpeechRecognition
+                    language={language}
+                    onResult={(text) => setSymptoms(prev => prev + ' ' + text)}
+                    className="h-8 w-8 hover-lift"
+                  />
+                </MotionWrapper>
+              </div>
               <li>
-                {language === 'ar' 
-                  ? 'الأعراض الحالية وشدتها'
-                  : language === 'fr'
-                  ? 'Symptômes actuels et leur intensité'
-                  : 'الأعراض اللي عندك دابا و قداش قوية'
-                }
-              </li>
-              <li>
-                {language === 'ar' 
-                  ? 'متى بدأت الأعراض'
-                  : language === 'fr'
-                  ? 'Quand les symptômes ont commencé'
-                  : 'إمتى بداو الأعراض'
-                }
-              </li>
-              <li>
-                {language === 'ar' 
-                  ? 'أي عوامل مؤثرة أو محفزة'
-                  : language === 'fr'
-                  ? 'Facteurs déclenchants ou aggravants'
-                  : 'أي حاجة خلات الأعراض تزيد'
-                }
-              </li>
-            </ul>
-          </div>
-        </CardContent>
-      </Card>
+            
+            <MotionWrapper animation="slideUp" delay={400}>
+              <Button
+                onClick={handleSubmit}
+                disabled={!symptoms.trim() || isLoading}
+                className={`w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold py-3 shadow-lg hover-lift transition-all duration-300 ${isRTL ? 'flex-row-reverse' : ''}`}
+              >
+                {isLoading ? (
+                  <>
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    {getTranslation(language, 'analyzing')}
+                  </>
+                ) : (
+                  <>
+                    <Heart className="h-4 w-4 mr-2" />
+                    {getTranslation(language, 'symptoms')}
+                  </>
+                )}
+              </Button>
+            </MotionWrapper>
+          </CardContent>
+        </GlassCard>
+      </MotionWrapper>
     </div>
   );
 }
