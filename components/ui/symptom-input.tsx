@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { SpeechRecognitionComponent } from '@/components/ui/speech-recognition';
-import { AlertTriangle, Mic, Send, Loader2 } from 'lucide-react';
+import { AlertTriangle, Mic, Send, Loader2, Heart } from 'lucide-react';
 import { getTranslation, type Language } from '@/lib/i18n';
 
 interface SymptomInputProps {
@@ -126,6 +126,10 @@ export function SymptomInput({ language, onSubmit, onEmergency, isLoading }: Sym
               <AlertTriangle className="h-4 w-4" />
               {getTranslation(language, 'emergency')}
             </Button>
+          </div>
+        </CardContent>
+      </Card>
+
       <MotionWrapper animation="slideUp" delay={200}>
         <GlassCard hover glow className="backdrop-blur-lg">
           <CardHeader>
@@ -151,7 +155,7 @@ export function SymptomInput({ language, onSubmit, onEmergency, isLoading }: Sym
                   />
                 </MotionWrapper>
               </div>
-              <li>
+            </div>
             
             <MotionWrapper animation="slideUp" delay={400}>
               <Button

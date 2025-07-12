@@ -71,6 +71,10 @@ export function SymptomAnalysisDisplay({ analysis, language, symptoms }: Symptom
               {getSeverityIcon(analysis.severity)}
               {getTranslation(language, `severity.${analysis.severity}`)}
             </Badge>
+          </div>
+        </CardHeader>
+      </Card>
+
       <MotionWrapper animation="slideUp" delay={400}>
         <GlassCard hover className="backdrop-blur-md">
           <CardHeader>
@@ -94,48 +98,51 @@ export function SymptomAnalysisDisplay({ analysis, language, symptoms }: Symptom
         </GlassCard>
       </MotionWrapper>
 
-            <div className="mb-4">
-      <MotionWrapper animation="slideUp" delay={600}>
-        <GlassCard hover glow className="backdrop-blur-lg border-green-200/30">
-          <CardHeader>
-            <CardTitle className={`flex items-center gap-2 text-lg font-semibold text-gray-800 ${isRTL ? 'flex-row-reverse text-right' : 'text-left'}`}>
-              <CheckCircle className="h-5 w-5 text-green-500" />
-              {getTranslation(language, 'recommendations')}
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ul className={`space-y-3 ${isRTL ? 'text-right' : 'text-left'}`}>
-              {analysis.recommendations.map((recommendation, index) => (
-                <MotionWrapper key={index} animation="slideLeft" delay={700 + index * 100}>
-                  <li className="flex items-start gap-3 p-3 rounded-lg bg-green-50/50 hover:bg-green-100/50 transition-colors duration-200">
-                    <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
-                    <span className="text-sm text-gray-700 font-medium">{recommendation}</span>
-                  </li>
-                </MotionWrapper>
-              ))}
-            </ul>
-          </CardContent>
-        </GlassCard>
-      </MotionWrapper>
-                <strong className="text-gray-900">{getTranslation(language, 'symptoms')}:</strong> {symptoms}
-              </div>
-            </MotionWrapper>
-        <MotionWrapper animation="slideUp" delay={800}>
-          <GlassCard className="border-yellow-200/50 bg-yellow-50/80 hover:bg-yellow-100/80">
-            <CardContent className="p-4">
-              <div className={`flex items-start gap-3 text-yellow-800 ${isRTL ? 'flex-row-reverse text-right' : 'text-left'}`}>
-                <AlertTriangle className="h-5 w-5 mt-0.5 flex-shrink-0 animate-pulse" />
-                <div>
-                  <p className="font-semibold text-yellow-900">Warning</p>
-                  <p className="text-sm mt-1 text-yellow-800">{analysis.warning}</p>
-                </div>
-              </div>
+      <div className="mb-4">
+        <MotionWrapper animation="slideUp" delay={600}>
+          <GlassCard hover glow className="backdrop-blur-lg border-green-200/30">
+            <CardHeader>
+              <CardTitle className={`flex items-center gap-2 text-lg font-semibold text-gray-800 ${isRTL ? 'flex-row-reverse text-right' : 'text-left'}`}>
+                <CheckCircle className="h-5 w-5 text-green-500" />
+                {getTranslation(language, 'recommendations')}
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ul className={`space-y-3 ${isRTL ? 'text-right' : 'text-left'}`}>
+                {analysis.recommendations.map((recommendation, index) => (
+                  <MotionWrapper key={index} animation="slideLeft" delay={700 + index * 100}>
+                    <li className="flex items-start gap-3 p-3 rounded-lg bg-green-50/50 hover:bg-green-100/50 transition-colors duration-200">
+                      <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
+                      <span className="text-sm text-gray-700 font-medium">{recommendation}</span>
+                    </li>
+                  </MotionWrapper>
+                ))}
+              </ul>
             </CardContent>
           </GlassCard>
         </MotionWrapper>
-                    <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
-                    <span className="text-sm text-blue-700 font-medium">
-                      {Math.round(analysis.confidence * 100)}% confidence
+        <strong className="text-gray-900">{getTranslation(language, 'symptoms')}:</strong> {symptoms}
+      </div>
+
+      <MotionWrapper animation="slideUp" delay={800}>
+        <GlassCard className="border-yellow-200/50 bg-yellow-50/80 hover:bg-yellow-100/80">
+          <CardContent className="p-4">
+            <div className={`flex items-start gap-3 text-yellow-800 ${isRTL ? 'flex-row-reverse text-right' : 'text-left'}`}>
+              <AlertTriangle className="h-5 w-5 mt-0.5 flex-shrink-0 animate-pulse" />
+              <div>
+                <p className="font-semibold text-yellow-900">Warning</p>
+                <p className="text-sm mt-1 text-yellow-800">{analysis.warning}</p>
+              </div>
+            </div>
+          </CardContent>
+        </GlassCard>
+      </MotionWrapper>
+
+      <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
+      <span className="text-sm text-blue-700 font-medium">
+        {Math.round(analysis.confidence * 100)}% confidence
+      </span>
+
       <MotionWrapper animation="fadeIn" delay={900}>
         <GlassCard variant="subtle" className="bg-gray-50/50">
           <CardContent className="p-4">
