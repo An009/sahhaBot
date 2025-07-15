@@ -205,36 +205,61 @@
 .btn-primary {
   @apply btn-base bg-gradient-primary text-white shadow-lg;
   @apply hover:shadow-xl hover:scale-105 hover:brightness-110;
-  @apply focus-visible:ring-blue-500;
   @apply active:scale-95;
+  
+  &:focus-visible {
+    outline: 2px solid transparent;
+    outline-offset: 2px;
+    box-shadow: 0 0 0 3px var(--primary-blue);
+  }
 }
 
 .btn-secondary {
   @apply btn-base bg-gradient-secondary text-primary-dark shadow-md;
   @apply hover:shadow-lg hover:scale-105 hover:brightness-110;
-  @apply focus-visible:ring-teal-400;
   @apply active:scale-95;
+  
+  &:focus-visible {
+    outline: 2px solid transparent;
+    outline-offset: 2px;
+    box-shadow: 0 0 0 3px var(--secondary-mint);
+  }
 }
 
 .btn-accent {
   @apply btn-base bg-gradient-accent text-primary-dark shadow-md;
   @apply hover:shadow-lg hover:scale-105 hover:brightness-110;
-  @apply focus-visible:ring-orange-400;
   @apply active:scale-95;
+  
+  &:focus-visible {
+    outline: 2px solid transparent;
+    outline-offset: 2px;
+    box-shadow: 0 0 0 3px var(--secondary-peach);
+  }
 }
 
 .btn-outline {
   @apply btn-base border-2 border-primary-blue text-primary-blue bg-transparent;
   @apply hover:bg-primary-blue hover:text-white hover:shadow-lg hover:scale-105;
-  @apply focus-visible:ring-blue-500;
   @apply active:scale-95;
+  
+  &:focus-visible {
+    outline: 2px solid transparent;
+    outline-offset: 2px;
+    box-shadow: 0 0 0 3px var(--primary-blue);
+  }
 }
 
 .btn-ghost {
   @apply btn-base text-primary-blue bg-transparent;
   @apply hover:bg-primary-blue/10 hover:scale-105;
-  @apply focus-visible:ring-blue-500;
   @apply active:scale-95;
+  
+  &:focus-visible {
+    outline: 2px solid transparent;
+    outline-offset: 2px;
+    box-shadow: 0 0 0 3px var(--primary-blue);
+  }
 }
 
 /* Button Sizes */
@@ -281,9 +306,14 @@
 .input-base {
   @apply w-full rounded-xl border border-neutral-300 bg-white px-4 py-3 text-base;
   @apply transition-all duration-300 ease-out;
-  @apply focus:border-primary-blue focus:ring-2 focus:ring-primary-blue/20 focus:outline-none;
   @apply hover:border-neutral-400;
   @apply placeholder:text-neutral-400;
+  
+  &:focus {
+    border-color: var(--primary-blue);
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(85, 133, 181, 0.2);
+  }
 }
 
 .input-error {
