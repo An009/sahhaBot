@@ -205,35 +205,35 @@
 .btn-primary {
   @apply btn-base bg-gradient-primary text-white shadow-lg;
   @apply hover:shadow-xl hover:scale-105 hover:brightness-110;
-  @apply focus-visible:ring-primary-blue;
+  @apply focus-visible:ring-blue-500;
   @apply active:scale-95;
 }
 
 .btn-secondary {
   @apply btn-base bg-gradient-secondary text-primary-dark shadow-md;
   @apply hover:shadow-lg hover:scale-105 hover:brightness-110;
-  @apply focus-visible:ring-secondary-mint;
+  @apply focus-visible:ring-teal-400;
   @apply active:scale-95;
 }
 
 .btn-accent {
   @apply btn-base bg-gradient-accent text-primary-dark shadow-md;
   @apply hover:shadow-lg hover:scale-105 hover:brightness-110;
-  @apply focus-visible:ring-secondary-peach;
+  @apply focus-visible:ring-orange-400;
   @apply active:scale-95;
 }
 
 .btn-outline {
   @apply btn-base border-2 border-primary-blue text-primary-blue bg-transparent;
   @apply hover:bg-primary-blue hover:text-white hover:shadow-lg hover:scale-105;
-  @apply focus-visible:ring-primary-blue;
+  @apply focus-visible:ring-blue-500;
   @apply active:scale-95;
 }
 
 .btn-ghost {
   @apply btn-base text-primary-blue bg-transparent;
   @apply hover:bg-primary-blue/10 hover:scale-105;
-  @apply focus-visible:ring-primary-blue;
+  @apply focus-visible:ring-blue-500;
   @apply active:scale-95;
 }
 
