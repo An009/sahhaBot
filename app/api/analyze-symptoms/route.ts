@@ -178,7 +178,7 @@ function parseAnalysisResponse(text: string): SymptomAnalysisResponse['analysis'
           recommendedActions: Array.isArray(parsed.recommendedActions) ? parsed.recommendedActions : [parsed.recommendedActions],
           urgencyLevel: ['low', 'medium', 'high'].includes(parsed.urgencyLevel) ? parsed.urgencyLevel : 'medium',
           confidence: Math.min(Math.max(parsed.confidence, 0.1), 1.0),
-          warning: parsed.warning || undefined
+          warning: parsed.warning || undefined,
           additionalInfo: parsed.additionalInfo || undefined
         };
       }
