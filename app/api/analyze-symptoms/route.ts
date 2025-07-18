@@ -87,35 +87,80 @@ function createMedicalPrompt(symptoms: string, age?: number, gender?: string, la
   const ageText = age ? ` The patient is ${age} years old.` : '';
   const genderText = gender ? ` The patient's gender is ${gender}.` : '';
   
-  const languageInstructions = language === 'ar' ? 
-    'Please respond in Arabic.' : 
-    language === 'fr' ? 
-    'Please respond in French.' : 
-    'Please respond in English.';
+  const languageInstructions = getLanguageInstructions(language);
+  const medicalContext = getMedicalContext(language);
 
-  return `You are a medical AI assistant. Analyze the following symptoms and provide a structured medical assessment.
+  return `You are a medical AI assistant specialized in providing comprehensive medical guidance. Analyze the following symptoms and provide a detailed, structured medical assessment.
 
 Patient Information:${ageText}${genderText}
 Symptoms: ${symptoms}
 
-Please provide your analysis in the following JSON format:
+${medicalContext}
+
+Please provide a comprehensive analysis in the following JSON format:
 {
-  "possibleConditions": ["condition1", "condition2", "condition3"],
-  "recommendedActions": ["action1", "action2", "action3"],
+  "possibleConditions": ["detailed condition 1 with explanation", "detailed condition 2 with explanation", "detailed condition 3 with explanation"],
+  "recommendedActions": ["detailed action 1 with rationale", "detailed action 2 with rationale", "detailed action 3 with rationale", "detailed action 4 with rationale", "detailed action 5 with rationale"],
   "urgencyLevel": "low|medium|high",
   "confidence": 0.85,
-  "warning": "Important safety information if applicable"
+  "warning": "Important safety information if applicable",
+  "additionalInfo": "Detailed explanation of the analysis, potential complications, and when to seek immediate care"
 }
 
 Important guidelines:
-- Always include a disclaimer that this is not a substitute for professional medical advice
-- If symptoms suggest emergency conditions, set urgencyLevel to "high" and include emergency recommendations
-- Confidence should be between 0.1 and 1.0
-- Provide 2-5 possible conditions and 3-6 recommended actions
+- Provide detailed, comprehensive explanations for each condition and recommendation
+- Include specific timeframes for when to seek care (e.g., "within 24 hours", "immediately")
+- Explain the reasoning behind each recommendation
+- If symptoms suggest emergency conditions, set urgencyLevel to "high" and include detailed emergency protocols
+- Confidence should be between 0.1 and 1.0 based on symptom specificity
+- Provide 3-5 detailed possible conditions and 5-7 comprehensive recommended actions
 - ${languageInstructions}
-- Be culturally sensitive and appropriate for Moroccan healthcare context
+- Use appropriate medical terminology for the target language
+- Be culturally sensitive and appropriate for Moroccan healthcare context when applicable
+- Include preventive measures and lifestyle recommendations where relevant
 
 Respond only with the JSON object, no additional text.`;
+}
+
+// Get language-specific instructions
+function getLanguageInstructions(language: string): string {
+  switch (language) {
+    case 'ar':
+    case 'da':
+      return 'يجب أن تكون جميع الاستجابات باللغة العربية مع استخدام المصطلحات الطبية المناسبة. استخدم اللهجة المغربية (الدارجة) عند الضرورة للوضوح.';
+    case 'fr':
+      return 'Toutes les réponses doivent être en français avec une terminologie médicale appropriée. Utilisez un langage clair et accessible tout en maintenant la précision médicale.';
+    default:
+      return 'All responses must be in English with appropriate medical terminology. Use clear, accessible language while maintaining medical accuracy.';
+  }
+}
+
+// Get medical context for different languages
+function getMedicalContext(language: string): string {
+  switch (language) {
+    case 'ar':
+    case 'da':
+      return `السياق الطبي: قدم تحليلاً طبياً شاملاً يتضمن:
+- شرح مفصل لكل حالة محتملة مع الأعراض المرتبطة
+- توصيات علاجية واضحة مع الأسباب
+- إرشادات زمنية محددة لطلب الرعاية الطبية
+- معلومات عن الوقاية والرعاية الذاتية
+- تحذيرات مهمة حول العلامات الخطيرة`;
+    case 'fr':
+      return `Contexte médical: Fournissez une analyse médicale complète incluant:
+- Explication détaillée de chaque condition possible avec les symptômes associés
+- Recommandations thérapeutiques claires avec justifications
+- Directives temporelles spécifiques pour consulter un médecin
+- Informations sur la prévention et les soins personnels
+- Avertissements importants sur les signes dangereux`;
+    default:
+      return `Medical context: Provide a comprehensive medical analysis including:
+- Detailed explanation of each possible condition with associated symptoms
+- Clear therapeutic recommendations with rationale
+- Specific timing guidelines for seeking medical care
+- Information on prevention and self-care
+- Important warnings about dangerous signs`;
+  }
 }
 
 // Parse Cohere response and extract JSON
@@ -134,6 +179,7 @@ function parseAnalysisResponse(text: string): SymptomAnalysisResponse['analysis'
           urgencyLevel: ['low', 'medium', 'high'].includes(parsed.urgencyLevel) ? parsed.urgencyLevel : 'medium',
           confidence: Math.min(Math.max(parsed.confidence, 0.1), 1.0),
           warning: parsed.warning || undefined
+          additionalInfo: parsed.additionalInfo || undefined
         };
       }
     }
@@ -147,7 +193,8 @@ function parseAnalysisResponse(text: string): SymptomAnalysisResponse['analysis'
     recommendedActions: [
       'Consult with a healthcare professional',
       'Monitor symptoms closely',
-      'Seek immediate medical attention if symptoms worsen'
+      'Seek immediate medical attention if symptoms worsen',
+      'Keep a detailed record of symptom progression'
     ],
     urgencyLevel: 'medium',
     confidence: 0.3,

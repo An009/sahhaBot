@@ -4,6 +4,7 @@ export interface SymptomAnalysis {
   recommendations: string[];
   urgency: string;
   warning?: string;
+  additionalInfo?: string;
   timestamp: string;
   source: 'api' | 'fallback';
   confidence?: number;
@@ -16,6 +17,7 @@ interface APIResponse {
     urgencyLevel: 'low' | 'medium' | 'high';
     confidence: number;
     warning?: string;
+    additionalInfo?: string;
   };
 }
 

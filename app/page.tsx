@@ -65,11 +65,14 @@ export default function Home() {
     setSymptoms(symptomText);
     setIsLoading(true);
     
+    // Don't automatically switch to analysis view
+    // Let user manually navigate to see results
+    
     try {
       const aiService = AIService.getInstance();
       const result = await aiService.analyzeSymptoms(symptomText, language);
       setAnalysis(result);
-      setCurrentStep('analysis');
+      // Remove automatic navigation - user must click Analysis tab
     } catch (error) {
       console.error('Analysis error:', error);
       // Handle error appropriately
