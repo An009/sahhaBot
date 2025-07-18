@@ -148,7 +148,7 @@ export function SymptomAnalysisDisplay({ analysis, language, symptoms }: Symptom
                     {getTranslation(language, 'analysis')}
                   </CardTitle>
                   <Badge className={`${severityConfig.color} font-medium`}>
-                    {getTranslation(language, 'severity')}: {severityConfig.label}
+                    {getTranslation(language, `severity.${analysis.severity}`)}: {severityConfig.label}
                   </Badge>
                 </div>
               </div>
