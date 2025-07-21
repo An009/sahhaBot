@@ -165,7 +165,7 @@ export default function Home() {
                 onClick={() => setCurrentStep('input')}
                 className={`flex items-center gap-2 transition-all duration-300 ${
                   currentStep === 'input' 
-                    ? 'bg-white shadow-lg hover-lift' 
+                    ? 'bg-white text-gray-900 shadow-lg hover-lift' 
                     : 'hover:bg-white/20'
                 } ${isRTL ? 'flex-row-reverse' : ''}`}
               >
@@ -179,7 +179,7 @@ export default function Home() {
                 disabled={!analysis}
                 className={`flex items-center gap-2 transition-all duration-300 ${
                   currentStep === 'analysis' 
-                    ? 'bg-white shadow-lg hover-lift' 
+                    ? 'bg-white text-gray-900 shadow-lg hover-lift' 
                     : 'hover:bg-white/20'
                 } ${isRTL ? 'flex-row-reverse' : ''}`}
               >
@@ -192,7 +192,7 @@ export default function Home() {
                 onClick={() => setCurrentStep('facilities')}
                 className={`flex items-center gap-2 transition-all duration-300 ${
                   currentStep === 'facilities' 
-                    ? 'bg-white shadow-lg hover-lift' 
+                    ? 'bg-white text-gray-900 shadow-lg hover-lift' 
                     : 'hover:bg-white/20'
                 } ${isRTL ? 'flex-row-reverse' : ''}`}
               >
@@ -221,6 +221,10 @@ export default function Home() {
             )}
           </MotionWrapper>
 
+          <MotionWrapper animation="fadeIn" delay={700}>
+            <ParticleSystem particleCount={40} connectionDistance={100} mouseInfluence={80} />
+          </MotionWrapper>
+          
           <MotionWrapper animation="fadeIn" delay={700}>
             {currentStep === 'input' && (
               <SymptomInput
