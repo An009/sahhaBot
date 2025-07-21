@@ -12,6 +12,8 @@ import { LanguageSelector } from '@/components/ui/language-selector';
 import { SymptomInput } from '@/components/ui/symptom-input';
 import { SymptomAnalysisDisplay } from '@/components/ui/symptom-analysis';
 import { HealthcareFinder } from '@/components/ui/healthcare-finder';
+import { MedicalNotification, AnalysisCompleteBanner, AnalysisReadyIndicator } from '@/components/ui/medical-notification';
+import { useNotification } from '@/hooks/use-notification';
 import { Heart, MapPin, Wifi, WifiOff, Shield } from 'lucide-react';
 import { getTranslation, type Language } from '@/lib/i18n';
 import { AIService, type SymptomAnalysis } from '@/lib/ai-service';
@@ -24,6 +26,9 @@ export default function Home() {
   const [isLoading, setIsLoading] = useState(false);
   const [userLocation, setUserLocation] = useState<{ latitude: number; longitude: number } | null>(null);
   const [isOnline, setIsOnline] = useState(true);
+  const [showAnalysisBanner, setShowAnalysisBanner] = useState(false);
+  const [showAnalysisIndicator, setShowAnalysisIndicator] = useState(false);
+  const { notifications, removeNotification, showAnalysisComplete } = useNotification();
 
   useEffect(() => {
     // Register service worker
@@ -72,7 +77,18 @@ export default function Home() {
       const aiService = AIService.getInstance();
       const result = await aiService.analyzeSymptoms(symptomText, language);
       setAnalysis(result);
-      // Remove automatic navigation - user must click Analysis tab
+      
+      // Show completion notifications
+      setShowAnalysisBanner(true);
+      setShowAnalysisIndicator(true);
+      
+      // Show notification popup
+      showAnalysisComplete(language, () => {
+        setCurrentStep('analysis');
+        setShowAnalysisBanner(false);
+        setShowAnalysisIndicator(false);
+      }, result.severity);
+      
     } catch (error) {
       console.error('Analysis error:', error);
       // Handle error appropriately
@@ -189,6 +205,22 @@ export default function Home() {
 
         {/* Main Content */}
         <main className="space-y-8">
+          {/* Analysis Complete Banner */}
+          <MotionWrapper animation="slideDown" delay={200}>
+            {showAnalysisBanner && analysis && (
+              <AnalysisCompleteBanner
+                language={language}
+                severity={analysis.severity}
+                onViewResults={() => {
+                  setCurrentStep('analysis');
+                  setShowAnalysisBanner(false);
+                  setShowAnalysisIndicator(false);
+                }}
+                onDismiss={() => setShowAnalysisBanner(false)}
+              />
+            )}
+          </MotionWrapper>
+
           <MotionWrapper animation="fadeIn" delay={700}>
             {currentStep === 'input' && (
               <SymptomInput
@@ -235,6 +267,34 @@ export default function Home() {
             )}
           </MotionWrapper>
         </main>
+
+        {/* Analysis Ready Indicator */}
+        {showAnalysisIndicator && analysis && (
+          <AnalysisReadyIndicator
+            language={language}
+            severity={analysis.severity}
+            onClick={() => {
+              setCurrentStep('analysis');
+              setShowAnalysisBanner(false);
+              setShowAnalysisIndicator(false);
+            }}
+          />
+        )}
+
+        {/* Notification System */}
+        {notifications.map((notification) => (
+          <MedicalNotification
+            key={notification.id}
+            type={notification.type}
+            title={notification.title}
+            message={notification.message}
+            action={notification.action}
+            onClose={() => removeNotification(notification.id)}
+            autoClose={notification.autoClose}
+            duration={notification.duration}
+            language={language}
+          />
+        ))}
 
         {/* Footer */}
         <MotionWrapper animation="fadeIn" delay={1000}>
