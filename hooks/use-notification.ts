@@ -49,10 +49,10 @@ export function useNotification() {
     setNotifications(prev => [...prev, notification]);
 
     // Auto-remove notification if autoClose is enabled
-    if (notification.autoClose && notification.duration > 0) {
+    if (notification.autoClose && (notification.duration ?? 0) > 0) {
       setTimeout(() => {
         removeNotification(id);
-      }, notification.duration);
+      }, notification.duration ?? 0);
     }
 
     return id;
