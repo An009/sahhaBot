@@ -98,7 +98,8 @@ export default function Home() {
   };
 
   const handleEmergency = () => {
-    // In a real app, this would trigger emergency services
+    // in a real app this would trigger an emergency call
+    // For demo purposes, we will just open the emergency number
     window.open('tel:150', '_self'); // Morocco emergency number
   };
 
@@ -206,7 +207,7 @@ export default function Home() {
         {/* Main Content */}
         <main className="space-y-8">
           {/* Analysis Complete Banner */}
-          <MotionWrapper animation="slideDown" delay={200}>
+          <MotionWrapper animation="slideUp" delay={200}>
             {showAnalysisBanner && analysis && (
               <AnalysisCompleteBanner
                 language={language}
