@@ -121,7 +121,7 @@ export function useNotification() {
         label: getActionLabel(language),
         onClick: onViewResults
       },
-      autoClose: false // Don't auto-close analysis results
+      autoClose: true
     });
   }, [addNotification]);
 
@@ -156,7 +156,7 @@ export function useNotification() {
         label: getRetryLabel(language),
         onClick: retry
       } : undefined,
-      autoClose: false // Don't auto-close errors
+      autoClose: true 
     });
   }, [addNotification]);
 
