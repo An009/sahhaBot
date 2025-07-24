@@ -1,3 +1,5 @@
+'use client';
+
 export interface SpeechRecognitionResult {
   transcript: string;
   confidence: number;
@@ -31,7 +33,7 @@ export class AdvancedSpeechRecognition {
   private recognition: SpeechRecognition | null = null;
   private audioContext: AudioContext | null = null;
   private mediaStream: MediaStream | null = null;
-  private processor: ScriptProcessorNode | null = null;
+  private processor: ScriptProcessorNode | null = null; // Deprecated, consider AudioWorkletNode for future
   private analyser: AnalyserNode | null = null;
   private isListening = false;
   private currentSession: TranscriptionSession | null = null;
@@ -41,6 +43,9 @@ export class AdvancedSpeechRecognition {
   private silenceTimeout = 2000; // ms
   private currentSpeaker = 'Speaker 1';
   private speakerChangeThreshold = 3000; // ms
+
+  private dataArray: Uint8Array | null = null; // To store frequency data for volume calculation
+  private bufferLength: number = 0; // Length of the frequency data array
 
   // Language configurations with Moroccan Darija support
   private languageConfigs = {
@@ -102,10 +107,12 @@ export class AdvancedSpeechRecognition {
       
       // Create analyser for volume detection
       this.analyser = this.audioContext.createAnalyser();
-      this.analyser.fftSize = 256;
+      this.analyser.fftSize = 256; // Smaller FFT size for quicker visual updates
       this.analyser.smoothingTimeConstant = 0.8;
+      this.bufferLength = this.analyser.frequencyBinCount;
+      this.dataArray = new Uint8Array(this.bufferLength);
       
-      // Create noise gate processor
+      // Create noise gate processor (Note: ScriptProcessorNode is deprecated)
       this.processor = this.audioContext.createScriptProcessor(4096, 1, 1);
       
       // Connect audio nodes
@@ -118,7 +125,7 @@ export class AdvancedSpeechRecognition {
         const inputBuffer = event.inputBuffer;
         const inputData = inputBuffer.getChannelData(0);
         
-        // Calculate RMS volume
+        // Calculate RMS volume for internal speech detection
         let sum = 0;
         for (let i = 0; i < inputData.length; i++) {
           sum += inputData[i] * inputData[i];
@@ -135,6 +142,23 @@ export class AdvancedSpeechRecognition {
     } catch (error) {
       console.error('Failed to setup audio processing:', error);
     }
+  }
+
+  /**
+   * Returns the current audio volume (0-100) from the microphone.
+   */
+  getAudioVolume(): number {
+    if (!this.analyser || !this.dataArray) {
+      return 0;
+    }
+    this.analyser.getByteFrequencyData(this.dataArray);
+    let sum = 0;
+    for (let i = 0; i < this.bufferLength; i++) {
+      sum += this.dataArray[i];
+    }
+    const average = sum / this.bufferLength;
+    // Scale 0-255 (byte data) to 0-100 for display
+    return Math.min(100, Math.max(0, average * (100 / 255))); 
   }
 
   private initializeSpeechRecognition(language: string): boolean {
@@ -420,6 +444,9 @@ export class AdvancedSpeechRecognition {
       this.analyser.disconnect();
       this.analyser = null;
     }
+
+    this.dataArray = null;
+    this.bufferLength = 0;
 
     this.recognition = null;
     this.currentSession = null;
