@@ -22,6 +22,26 @@ import { getTranslation, type Language } from '@/lib/i18n';
 import { MotionWrapper } from '@/components/ui/motion-wrapper';
 import { GlassCard } from '@/components/ui/glass-card';
 
+// --- NEW IMPORTS FOR MAP ---
+// Ensure you have installed 'leaflet' and 'react-leaflet':
+// npm install leaflet react-leaflet
+// or
+// yarn add leaflet react-leaflet
+import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
+import 'leaflet/dist/leaflet.css'; // Essential Leaflet CSS
+import L from 'leaflet'; // Import Leaflet itself for custom icons
+
+// Fix for default Leaflet icon issue with Webpack/React
+// Without this, default marker icons may not show up.
+// Corrected typo from '_get IconUrl' to '_getIconUrl'
+delete (L.Icon.Default.prototype as any)._getIconUrl;
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
+  iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
+  shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
+});
+// --- END NEW IMPORTS FOR MAP ---
+
 interface HealthcareFacility {
   id: string;
   name: string;
@@ -53,14 +73,25 @@ export function HealthcareFinder({ language, userLocation }: HealthcareFinderPro
 
   const isRTL = language === 'ar' || language === 'da';
 
+  // --- MODIFICATION: useEffect to trigger data load on userLocation/filters change ---
   useEffect(() => {
     if (userLocation) {
       loadNearbyFacilities();
     }
-  }, [userLocation, searchRadius, facilityType]);
+  }, [userLocation, searchRadius, facilityType]); // Removed searchQuery from dependencies here
+  // Rationale: searchQuery filters already loaded data, no need to re-fetch from API
 
   const loadNearbyFacilities = async () => {
-    if (!userLocation) return;
+    if (!userLocation) {
+      setError(
+        language === 'ar' 
+          ? 'خطأ: الموقع غير متاح. يرجى السماح بالوصول إلى موقعك.'
+          : language === 'fr'
+          ? 'Erreur: Localisation non disponible. Veuillez autoriser l\'accès à votre position.'
+          : 'خطأ: الموقع ما متوفرش. خاصك تسمح بالوصول للموقع ديالك.'
+      );
+      return;
+    }
 
     setIsLoading(true);
     setError(null);
@@ -80,7 +111,9 @@ export function HealthcareFinder({ language, userLocation }: HealthcareFinderPro
       });
 
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        // Attempt to parse error message from response body
+        const errorData = await response.json().catch(() => ({ error: 'Unknown API error' }));
+        throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
       }
 
       const data = await response.json();
@@ -99,14 +132,16 @@ export function HealthcareFinder({ language, userLocation }: HealthcareFinderPro
       );
 
       setFacilities(facilitiesWithDistance);
-    } catch (error) {
-      console.error('Error loading facilities:', error);
+    } catch (err: any) {
+      console.error('Error loading facilities:', err);
       setError(
-        language === 'ar' 
+        err.message || 
+        (language === 'ar' 
           ? 'خطأ في تحميل المرافق الصحية. يرجى المحاولة مرة أخرى.'
           : language === 'fr'
           ? 'Erreur lors du chargement des établissements de santé. Veuillez réessayer.'
           : 'خطأ في تحميل المستشفيات. عاود المحاولة.'
+        )
       );
     } finally {
       setIsLoading(false);
@@ -163,6 +198,7 @@ export function HealthcareFinder({ language, userLocation }: HealthcareFinderPro
   const openDirections = (facility: HealthcareFacility) => {
     if (typeof window === 'undefined') return;
     
+    // Using Google Maps for directions as it's common and reliable
     const url = `https://www.google.com/maps/dir/?api=1&destination=${facility.location.latitude},${facility.location.longitude}`;
     window.open(url, '_blank');
   };
@@ -172,10 +208,12 @@ export function HealthcareFinder({ language, userLocation }: HealthcareFinderPro
     window.open(`tel:${phone}`, '_self');
   };
 
+  // --- MODIFICATION: Filtering now applies to the 'facilities' state which is already loaded ---
   const filteredFacilities = facilities.filter(facility =>
     facility.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     facility.address.toLowerCase().includes(searchQuery.toLowerCase())
   );
+  // --- END MODIFICATION ---
 
   if (!userLocation) {
     return (
@@ -269,7 +307,7 @@ export function HealthcareFinder({ language, userLocation }: HealthcareFinderPro
               </div>
 
               <Button
-                onClick={loadNearbyFacilities}
+                onClick={loadNearbyFacilities} // Still trigger re-fetch when filter button is clicked
                 disabled={isLoading}
                 className="h-12 px-6 hover-lift"
               >
@@ -284,12 +322,73 @@ export function HealthcareFinder({ language, userLocation }: HealthcareFinderPro
         </GlassCard>
       </MotionWrapper>
 
+      {/* --- NEW SECTION: Interactive Map Display --- */}
+      {userLocation && (
+        <MotionWrapper animation="slideUp" delay={200}>
+          <GlassCard className="h-[400px] w-full relative overflow-hidden">
+            <MapContainer 
+              center={[userLocation.latitude, userLocation.longitude]} 
+              zoom={13} 
+              scrollWheelZoom={true} // Allow zooming with mouse wheel
+              className="h-full w-full rounded-lg z-0"
+              // Add a key to force remount on userLocation change, preventing map issues
+              key={`${userLocation.latitude}-${userLocation.longitude}`}
+            >
+              <TileLayer
+                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+              />
+              {/* Marker for user's current location */}
+              <Marker position={[userLocation.latitude, userLocation.longitude]}>
+                <Popup>
+                  {getTranslation(language, 'yourLocation')}
+                </Popup>
+              </Marker>
+              {/* Markers for healthcare facilities */}
+              {filteredFacilities.map(facility => (
+                <Marker key={facility.id} position={[facility.location.latitude, facility.location.longitude]}>
+                  <Popup>
+                    <div className={`${isRTL ? 'text-right' : 'text-left'}`}>
+                      <h4 className="font-bold text-gray-900">{facility.name}</h4>
+                      <p className="text-sm text-gray-700">{facility.address}</p>
+                      {facility.distance && (
+                        <p className="text-xs text-blue-600 mt-1">
+                          {formatDistance(facility.distance)}
+                        </p>
+                      )}
+                      <Button
+                        variant="link"
+                        size="sm"
+                        onClick={() => openDirections(facility)}
+                        className={`p-0 h-auto mt-2 ${isRTL ? 'justify-end' : 'justify-start'}`}
+                      >
+                        <Navigation className={`h-3 w-3 ${isRTL ? 'ml-1' : 'mr-1'}`} />
+                        {language === 'ar' ? 'اتجاهات' : language === 'fr' ? 'Directions' : 'اتجاهات'}
+                      </Button>
+                    </div>
+                  </Popup>
+                </Marker>
+              ))}
+            </MapContainer>
+            {isLoading && (
+              <div className="absolute inset-0 bg-white/70 backdrop-blur-sm flex items-center justify-center z-10 rounded-lg">
+                <div className="h-8 w-8 animate-spin rounded-full border-4 border-blue-500 border-t-transparent" />
+              </div>
+            )}
+            <p className={`absolute bottom-4 ${isRTL ? 'right-4' : 'left-4'} text-xs text-gray-400 z-10 bg-white/70 px-2 py-1 rounded-md`}>
+                {getTranslation(language, 'mapAttribution')}
+            </p>
+          </GlassCard>
+        </MotionWrapper>
+      )}
+      {/* --- END NEW SECTION --- */}
+
       {/* Error State */}
       {error && (
         <MotionWrapper animation="slideUp" delay={200}>
           <GlassCard className="border-red-200 bg-red-50/80">
             <CardContent className="p-4">
-              <div className={`flex items-center gap-3 text-red-800 ${isRTL ? 'flex-row-reverse text-right' : 'text-left'}`}>
+              <div className={`flex items-start gap-3 text-red-800 ${isRTL ? 'flex-row-reverse text-right' : 'text-left'}`}>
                 <AlertTriangle className="h-5 w-5 flex-shrink-0" />
                 <span>{error}</span>
               </div>
@@ -298,7 +397,7 @@ export function HealthcareFinder({ language, userLocation }: HealthcareFinderPro
         </MotionWrapper>
       )}
 
-      {/* Loading State */}
+      {/* Loading State for List */}
       {isLoading && (
         <MotionWrapper animation="fadeIn" delay={200}>
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
@@ -324,7 +423,7 @@ export function HealthcareFinder({ language, userLocation }: HealthcareFinderPro
             const FacilityIcon = getFacilityIcon(facility.type);
             
             return (
-              <MotionWrapper key={facility.id} animation="slideUp" delay={300 + index * 100}>
+              <MotionWrapper key={facility.id} animation="slideUp" delay={300 + index * 50}> {/* Adjusted delay for faster animation */}
                 <GlassCard className="h-full hover-lift transition-all duration-300 hover:shadow-lg">
                   <CardHeader className="pb-3">
                     <div className={`flex items-start justify-between ${isRTL ? 'flex-row-reverse' : ''}`}>
