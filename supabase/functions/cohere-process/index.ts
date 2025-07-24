@@ -104,7 +104,7 @@ serve(async (req: Request) => {
     console.log(`Processing request: query length=${body.query.length}, max_tokens=${maxTokens}, temperature=${temperature}`);
 
     // Prepare Cohere API request
-    const cohereApiKey = 'OQg8ckowsFnKYWQvNwZWroRiOwSS9eGWSy5fUESr';
+    const cohereApiKey = Deno.env.get('COHERE_API_KEY');
     const cohereUrl = 'https://api.cohere.ai/v1/generate';
 
     const coherePayload = {
