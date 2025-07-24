@@ -33,7 +33,9 @@ export const translations = {
     offline: 'غير متصل',
     syncWhenOnline: 'سيتم المزامنة عند الاتصال',
     analyzing: 'جاري التحليل...',
-    locationRequired: 'الموقع مطلوب'
+    locationRequired: 'الموقع مطلوب',
+    yourLocation: 'موقعك', // New translation key
+    mapAttribution: 'بيانات الخريطة © OpenStreetMap' // New translation key
   },
   fr: {
     appName: 'SahhaBot',
@@ -61,7 +63,9 @@ export const translations = {
     offline: 'Hors ligne',
     syncWhenOnline: 'Synchronisation à la connexion',
     analyzing: 'Analyse en cours...',
-    locationRequired: 'Localisation requise'
+    locationRequired: 'Localisation requise',
+    yourLocation: 'Votre position', // New translation key
+    mapAttribution: 'Données cartographiques © OpenStreetMap' // New translation key
   },
   da: {
     appName: 'صحة بوت',
@@ -89,7 +93,9 @@ export const translations = {
     offline: 'ماشي متصل',
     syncWhenOnline: 'غيتسينك ملي تتصل',
     analyzing: 'كنحلل...',
-    locationRequired: 'خاصنا الموقع'
+    locationRequired: 'خاصنا الموقع',
+    yourLocation: 'الموقع ديالك', // New translation key
+    mapAttribution: 'بيانات الخريطة © OpenStreetMap' // New translation key
   }
 };
 
