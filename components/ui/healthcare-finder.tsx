@@ -545,7 +545,7 @@ export function HealthcareFinder({ language, userLocation }: HealthcareFinderPro
                   ? 'جرب توسيع نطاق البحث أو تغيير نوع المرفق'
                   : language === 'fr'
                   ? 'Essayez d\'élargir le rayon de recherche ou de changer le type d\'établissement'
-                  : 'جرب توسيع نطاق البحث أو بدل نوع المرفق'
+                  : 'جرب توسيع نطاق البحث اولا بدل نوع المرفق'
                 }
               </p>
             </CardContent>
