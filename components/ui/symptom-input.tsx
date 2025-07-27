@@ -263,7 +263,7 @@ export function SymptomInput({ language, onSubmit, onEmergency, isLoading }: Sym
                   onClick={handleSubmit}
                   disabled={!canSubmit}
                   size="lg"
-                  className={`flex items-center gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 
+                  className={`flex items-center gap-2 bg-gradient-to-r from-blue-600 to-indigo-600
                     hover:from-blue-700 hover:to-indigo-700 transition-all duration-300 hover-lift
                     disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none
                     ${isRTL ? 'flex-row-reverse' : ''}`}
@@ -273,7 +273,7 @@ export function SymptomInput({ language, onSubmit, onEmergency, isLoading }: Sym
                   ) : (
                     <Send className="h-4 w-4" />
                   )}
-                  {isLoading 
+                  {isLoading
                     ? getTranslation(language, 'analyzing')
                     : getTranslation(language, 'symptoms')
                   }
