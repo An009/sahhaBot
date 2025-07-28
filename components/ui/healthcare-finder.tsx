@@ -218,7 +218,7 @@ export function HealthcareFinder({ language, userLocation }: HealthcareFinderPro
   if (!userLocation) {
     return (
       <MotionWrapper animation="slideUp" delay={100}>
-        <GlassCard className="text-center py-12">
+        <GlassCard variant="default" className="text-center py-12">
           <CardContent>
             <MapPin className="h-12 w-12 text-gray-400 mx-auto mb-4" />
             <h3 className="text-lg font-semibold text-gray-700 mb-2">
@@ -242,7 +242,7 @@ export function HealthcareFinder({ language, userLocation }: HealthcareFinderPro
     <div className="space-y-6 max-w-6xl mx-auto">
       {/* Search and Filters */}
       <MotionWrapper animation="slideUp" delay={100}>
-        <GlassCard>
+        <GlassCard variant="strong" hover glow>
           <CardHeader className="pb-4">
             <CardTitle className={`flex items-center gap-2 text-xl ${isRTL ? 'flex-row-reverse text-right' : 'text-left'}`}>
               <MapPin className="h-6 w-6 text-blue-600" />
@@ -307,7 +307,7 @@ export function HealthcareFinder({ language, userLocation }: HealthcareFinderPro
               </div>
 
               <Button
-                onClick={loadNearbyFacilities} // Still trigger re-fetch when filter button is clicked
+                onClick={loadNearbyFacilities}
                 disabled={isLoading}
                 className="h-12 px-6 hover-lift"
               >
@@ -322,20 +322,19 @@ export function HealthcareFinder({ language, userLocation }: HealthcareFinderPro
         </GlassCard>
       </MotionWrapper>
 
-      {/* --- NEW SECTION: Interactive Map Display --- */}
+      {/* NEW SECTION: Interactive Map Display */}
       {userLocation && (
         <MotionWrapper animation="slideUp" delay={200}>
-          <GlassCard className="h-[400px] w-full relative overflow-hidden">
+          <GlassCard variant="default" hover={false} glow={false} className="h-[400px] w-full relative overflow-hidden">
             <MapContainer 
               center={[userLocation.latitude, userLocation.longitude]} 
               zoom={13} 
-              scrollWheelZoom={true} // Allow zooming with mouse wheel
+              scrollWheelZoom={true}
               className="h-full w-full rounded-lg z-0"
-              // Add a key to force remount on userLocation change, preventing map issues
               key={`${userLocation.latitude}-${userLocation.longitude}`}
             >
               <TileLayer
-                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                attribution='© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                 url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
               />
               {/* Marker for user's current location */}
@@ -381,12 +380,11 @@ export function HealthcareFinder({ language, userLocation }: HealthcareFinderPro
           </GlassCard>
         </MotionWrapper>
       )}
-      {/* --- END NEW SECTION --- */}
 
       {/* Error State */}
       {error && (
         <MotionWrapper animation="slideUp" delay={200}>
-          <GlassCard className="border-red-200 bg-red-50/80">
+          <GlassCard hover={false} glow={false} className="border-red-200 bg-red-50/80">
             <CardContent className="p-4">
               <div className={`flex items-start gap-3 text-red-800 ${isRTL ? 'flex-row-reverse text-right' : 'text-left'}`}>
                 <AlertTriangle className="h-5 w-5 flex-shrink-0" />
@@ -423,8 +421,8 @@ export function HealthcareFinder({ language, userLocation }: HealthcareFinderPro
             const FacilityIcon = getFacilityIcon(facility.type);
             
             return (
-              <MotionWrapper key={facility.id} animation="slideUp" delay={300 + index * 50}> {/* Adjusted delay for faster animation */}
-                <GlassCard className="h-full hover-lift transition-all duration-300 hover:shadow-lg">
+              <MotionWrapper key={facility.id} animation="slideUp" delay={300 + index * 50}>
+                <GlassCard variant="default" hover glow className="h-full transition-all duration-300">
                   <CardHeader className="pb-3">
                     <div className={`flex items-start justify-between ${isRTL ? 'flex-row-reverse' : ''}`}>
                       <div className={`flex items-center gap-3 flex-1 ${isRTL ? 'flex-row-reverse' : ''}`}>
@@ -534,7 +532,7 @@ export function HealthcareFinder({ language, userLocation }: HealthcareFinderPro
       {/* No Results */}
       {!isLoading && filteredFacilities.length === 0 && !error && (
         <MotionWrapper animation="fadeIn" delay={300}>
-          <GlassCard className="text-center py-12">
+          <GlassCard variant="default" className="text-center py-12">
             <CardContent>
               <Search className="h-12 w-12 text-gray-400 mx-auto mb-4" />
               <h3 className="text-lg font-semibold text-gray-700 mb-2">
