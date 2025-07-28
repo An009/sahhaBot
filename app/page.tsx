@@ -122,16 +122,18 @@ export default function Home() {
               </MotionWrapper>
               <div className={`${isRTL ? 'text-right' : 'text-left'}`}>
                 <MotionWrapper animation="slideUp" delay={300}>
-                  <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+                  <h1 className="text-heading-1 bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
                     {getTranslation(language, 'appName')}
                   </h1>
-                  <p className="text-gray-600 text-sm mt-1">
+                </MotionWrapper>
+                <MotionWrapper animation="slideUp" delay={400}>
+                  <p className="text-body-large text-gray-600 mt-1">
                     {getTranslation(language, 'welcome')}
                   </p>
                 </MotionWrapper>
               </div>
             </div>
-            
+
             <MotionWrapper animation="slideLeft" delay={500}>
               <div className={`flex items-center gap-4 ${isRTL ? 'flex-row-reverse' : ''}`}>
                 <GlassCard variant="subtle" className="px-3 py-2">
@@ -146,9 +148,9 @@ export default function Home() {
                     </span>
                   </div>
                 </GlassCard>
-                <LanguageSelector 
-                  currentLanguage={language} 
-                  onLanguageChange={setLanguage} 
+                <LanguageSelector
+                  currentLanguage={language}
+                  onLanguageChange={setLanguage}
                 />
               </div>
             </MotionWrapper>
