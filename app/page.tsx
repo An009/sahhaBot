@@ -133,10 +133,10 @@ export default function Home() {
                 </MotionWrapper>
               </div>
             </div>
-
+            
             <MotionWrapper animation="slideLeft" delay={500}>
               <div className={`flex items-center gap-4 ${isRTL ? 'flex-row-reverse' : ''}`}>
-                <GlassCard variant="subtle" className="px-3 py-2">
+                <GlassCard variant="subtle" hover={false} glow={false} className="px-3 py-2">
                   <div className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
                     {isOnline ? (
                       <Wifi className="h-4 w-4 text-green-600 animate-pulse" />
@@ -148,9 +148,9 @@ export default function Home() {
                     </span>
                   </div>
                 </GlassCard>
-                <LanguageSelector
-                  currentLanguage={language}
-                  onLanguageChange={setLanguage}
+                <LanguageSelector 
+                  currentLanguage={language} 
+                  onLanguageChange={setLanguage} 
                 />
               </div>
             </MotionWrapper>
@@ -164,9 +164,9 @@ export default function Home() {
               <Button
                 variant={currentStep === 'input' ? 'default' : 'ghost'}
                 onClick={() => setCurrentStep('input')}
-                className={`flex items-center gap-2 transition-all duration-300 ${
+                className={`flex items-center gap-2 transition-all duration-300 hover-lift ${
                   currentStep === 'input' 
-                    ? 'bg-white text-gray-900 shadow-lg hover-lift' 
+                    ? 'bg-white text-gray-900 shadow-lg' 
                     : 'hover:bg-white/20'
                 } ${isRTL ? 'flex-row-reverse' : ''}`}
               >
@@ -178,9 +178,9 @@ export default function Home() {
                 variant={currentStep === 'analysis' ? 'default' : 'ghost'}
                 onClick={() => setCurrentStep('analysis')}
                 disabled={!analysis}
-                className={`flex items-center gap-2 transition-all duration-300 ${
+                className={`flex items-center gap-2 transition-all duration-300 hover-lift ${
                   currentStep === 'analysis' 
-                    ? 'bg-white text-gray-900 shadow-lg hover-lift' 
+                    ? 'bg-white text-gray-900 shadow-lg' 
                     : 'hover:bg-white/20'
                 } ${isRTL ? 'flex-row-reverse' : ''}`}
               >
@@ -191,9 +191,9 @@ export default function Home() {
               <Button
                 variant={currentStep === 'facilities' ? 'default' : 'ghost'}
                 onClick={() => setCurrentStep('facilities')}
-                className={`flex items-center gap-2 transition-all duration-300 ${
+                className={`flex items-center gap-2 transition-all duration-300 hover-lift ${
                   currentStep === 'facilities' 
-                    ? 'bg-white text-gray-900 shadow-lg hover-lift' 
+                    ? 'bg-white text-gray-900 shadow-lg' 
                     : 'hover:bg-white/20'
                 } ${isRTL ? 'flex-row-reverse' : ''}`}
               >
@@ -259,7 +259,7 @@ export default function Home() {
           {/* Offline Indicator */}
           <MotionWrapper animation="slideUp" delay={800}>
             {!isOnline && (
-              <GlassCard className="border-orange-200/50 bg-orange-50/80">
+              <GlassCard hover={false} glow={false} className="border-orange-200/50 bg-orange-50/80">
                 <CardContent className="p-4">
                   <div className={`flex items-center gap-2 text-orange-800 ${isRTL ? 'flex-row-reverse' : ''}`}>
                     <WifiOff className="h-4 w-4 animate-pulse" />
@@ -304,7 +304,7 @@ export default function Home() {
         {/* Footer */}
         <MotionWrapper animation="fadeIn" delay={1000}>
           <footer className={`mt-16 text-center ${isRTL ? 'text-right' : 'text-left'}`}>
-            <GlassCard variant="subtle" className="p-4">
+            <GlassCard variant="subtle" hover={false} glow={false} className="p-4">
               <p className="text-sm text-gray-600 font-medium">
                 ⚠️ هذا التطبيق للمساعدة الطبية الأولية فقط. في حالة الطوارئ، اتصل بـ 150
               </p>
